@@ -12,8 +12,8 @@ class NotificationManager:
     def send_sms(self, content):
         message = self.client.messages.create(
             body=content,
-            from_="+16076009148",
-            to="+447536128991"
+            from_=config('PHONE_FROM'),
+            to=config('PHONE_TO')
         )
         print(message.status)
 
