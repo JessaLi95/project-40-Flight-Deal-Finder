@@ -34,8 +34,24 @@ class FlightSearch:
         try:
             ticket_response = requests.get(search_url, headers=HEADER, params=ticket_parameters).json()["data"][0]
         except IndexError:
-            print(f"No flight found for {city}.")
-            return None
+            print(f"No direct flight to {ticket_parameters['fly_to']}")
+            ticket_parameters["max_stopovers"] = 1
+            try:
+                flight_1_stop = requests.get(search_url, headers=HEADER, params=ticket_parameters).json()["data"][0]
+            except IndexError:
+                print(f"No flight to {ticket_parameters['fly_to']} with 1 stopover.")
+                return None
+            else:
+                print(f"Stop over {flight_1_stop['route'][0]['cityTo']}: £{flight_1_stop['price']}")
+                return {
+                    "cityCodeFrom": flight_1_stop['flyFrom'],
+                    "cityCodeTo": flight_1_stop['flyTo'],
+                    "price": flight_1_stop['price'],
+                    "outbound_date": flight_1_stop['route'][0]['local_departure'].split('T')[0],
+                    "inbound_date": flight_1_stop['route'][1]['local_departure'].split('T')[0],
+                    "stop_over": 1,
+                    "via_city": flight_1_stop["route"][0]["cityTo"]
+                }
         else:
             print(f"{city}: £{ticket_response['price']}")
             return {
@@ -43,5 +59,5 @@ class FlightSearch:
                 "cityCodeTo": ticket_response['flyTo'],
                 "price": ticket_response['price'],
                 "outbound_date": ticket_response['route'][0]['local_departure'].split('T')[0],
-                "inbound_date": ticket_response['route'][1]['local_departure'].split('T')[0]
+                "inbound_date": ticket_response['route'][1]['local_departure'].split('T')[0],
             }

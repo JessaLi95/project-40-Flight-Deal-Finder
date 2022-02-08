@@ -1,16 +1,18 @@
 import requests
 from decouple import config
-url = config('SHEETY')
 
 
 class DataManager:
-    def app_get(self):
-        get_url = url
-        get_response = requests.get(get_url).json()
+    def __init__(self):
+        self.flight_url = config('SHEETY_FLIGHTS')
+        self.user_url = config('SHEETY_USERS')
+
+    def flights_get(self):
+        get_response = requests.get(self.flight_url).json()
         return get_response["prices"]
 
-    def app_put(self, row_id, iata_code):
-        put_url = f"{url}/{row_id}"
+    def flights_put(self, row_id, iata_code):
+        put_url = f"{self.flight_url}/{row_id}"
         put_body = {
             "price": {
                 "iataCode": iata_code
@@ -18,3 +20,10 @@ class DataManager:
         }
         put_response = requests.put(put_url, json=put_body)
         put_response.raise_for_status()
+
+    def users_get(self):
+        user_get_response = requests.get(self.user_url).json()
+        return user_get_response['users']
+
+
+
